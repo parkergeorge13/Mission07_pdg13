@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Mission06_pdg13.Models;
 using System;
@@ -11,13 +12,11 @@ namespace Mission06_pdg13.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-        private MovieDatabaseContext blahContext { get; set; }
+        private MovieDatabaseContext daContext { get; set; }
 
-        public HomeController(ILogger<HomeController> logger, MovieDatabaseContext someName)
+        public HomeController(MovieDatabaseContext someName)
         {
-            _logger = logger;
-            blahContext = someName;
+            daContext = someName;
         }
 
         public IActionResult Index()
@@ -33,26 +32,66 @@ namespace Mission06_pdg13.Controllers
         [HttpGet]
         public IActionResult Movies()
         {
+            ViewBag.Categories = daContext.Categories.ToList();
             return View();
         }
 
         [HttpPost]
         public IActionResult Movies(ApplicationResponse ar)
         {
-            blahContext.Add(ar);
-            blahContext.SaveChanges();
-            return View("Confirmation", ar);
+            if (ModelState.IsValid)
+            {
+                daContext.Add(ar);
+                daContext.SaveChanges();
+                return View("Confirmation", ar);
+            }
+            else //If Invalid
+            {
+                ViewBag.Categories = daContext.Categories.ToList();
+
+                return View();
+            }
         }
 
-        public IActionResult Privacy()
+        [HttpGet]
+        public IActionResult MovieList()
         {
-            return View();
-        }
+            var applications = daContext.Responses
+                .Include(x => x.Category)
+                .ToList();
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+            return View(applications);
+        }
+        [HttpGet]
+        public IActionResult Edit(int applicationid)
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            ViewBag.Categories = daContext.Categories.ToList();
+
+            var application = daContext.Responses.Single(x => x.ApplicationID == applicationid);
+
+            return View("Movies", application);
+        }
+        [HttpPost]
+        public IActionResult Edit (ApplicationResponse blah)
+        {
+            daContext.Update(blah);
+            daContext.SaveChanges();
+            return RedirectToAction("MovieList");
+        }
+        [HttpGet]
+        public IActionResult Delete(int applicationid)
+        {
+            var application = daContext.Responses.Single(x => x.ApplicationID == applicationid);
+
+            return View(application);
+        }
+        [HttpPost]
+        public IActionResult Delete(ApplicationResponse ar)
+        {
+            daContext.Responses.Remove(ar);
+            daContext.SaveChanges();
+
+            return RedirectToAction("MovieList");
         }
     }
 }

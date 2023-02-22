@@ -8,7 +8,7 @@ using Mission06_pdg13.Models;
 namespace Mission06_pdg13.Migrations
 {
     [DbContext(typeof(MovieDatabaseContext))]
-    [Migration("20230214014409_Initial")]
+    [Migration("20230222005334_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -23,9 +23,8 @@ namespace Mission06_pdg13.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Director")
                         .IsRequired()
@@ -54,13 +53,15 @@ namespace Mission06_pdg13.Migrations
 
                     b.HasKey("ApplicationID");
 
+                    b.HasIndex("CategoryId");
+
                     b.ToTable("Responses");
 
                     b.HasData(
                         new
                         {
                             ApplicationID = 1,
-                            Category = "Action/Adventure",
+                            CategoryId = 1,
                             Director = "Taika Waititi",
                             Edited = false,
                             Rating = "PG-13",
@@ -70,7 +71,7 @@ namespace Mission06_pdg13.Migrations
                         new
                         {
                             ApplicationID = 2,
-                            Category = "Sci-Fi",
+                            CategoryId = 2,
                             Director = "Christopher Nolan",
                             Edited = false,
                             Rating = "PG-13",
@@ -80,13 +81,68 @@ namespace Mission06_pdg13.Migrations
                         new
                         {
                             ApplicationID = 3,
-                            Category = "Comedy",
+                            CategoryId = 3,
                             Director = "Chris McKay",
                             Edited = false,
                             Rating = "PG",
                             Title = "The Lego Batman Movie",
                             Year = 2017
                         });
+                });
+
+            modelBuilder.Entity("Mission06_pdg13.Models.Category", b =>
+                {
+                    b.Property<int>("CategoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("CategoryName")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("CategoryId");
+
+                    b.ToTable("Categories");
+
+                    b.HasData(
+                        new
+                        {
+                            CategoryId = 1,
+                            CategoryName = "Action/Adventure"
+                        },
+                        new
+                        {
+                            CategoryId = 2,
+                            CategoryName = "Sci-Fi"
+                        },
+                        new
+                        {
+                            CategoryId = 3,
+                            CategoryName = "Comedy"
+                        },
+                        new
+                        {
+                            CategoryId = 4,
+                            CategoryName = "Romance"
+                        },
+                        new
+                        {
+                            CategoryId = 5,
+                            CategoryName = "Documentary"
+                        },
+                        new
+                        {
+                            CategoryId = 6,
+                            CategoryName = "Other"
+                        });
+                });
+
+            modelBuilder.Entity("Mission06_pdg13.Models.ApplicationResponse", b =>
+                {
+                    b.HasOne("Mission06_pdg13.Models.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

@@ -11,8 +11,12 @@ namespace Mission06_pdg13.Models
         [Key]
         [Required]
         public int ApplicationID { get; set; }
+
+        //Build Foreign Key Relationship
         [Required]
-        public string Category { get; set; }
+        public int CategoryId { get; set; }
+        public Category Category { get; set; }
+
         [Required]
         public string Title { get; set; }
         [Required]
